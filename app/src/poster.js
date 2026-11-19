@@ -135,6 +135,24 @@ export const PRESETS = {
     subcaption: 'FOUR CORNERS',
     captionPos: 'top',
   },
+  neonnights: {
+    label: 'Neon nights',
+    layout: 'quad',
+    grade: 'duotone',
+    frame: 'none',
+    caption: 'NEON NIGHTS',
+    subcaption: 'CITY LIGHTS · AFTER DARK',
+    captionPos: 'bottom',
+  },
+  tealmorning: {
+    label: 'Teal morning',
+    layout: 'strips',
+    grade: 'teal',
+    frame: 'thin',
+    caption: 'TEAL MORNING',
+    subcaption: 'OCEAN DRIVE · FIRST LIGHT',
+    captionPos: 'top',
+  },
 };
 
 const BAND_FRACTION = 0.21; // share of the height the caption band takes

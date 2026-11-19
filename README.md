@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/gta6-cover-art-01/Anggit98tkj/gta6-cover-art/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![reward](https://make.fun/badge/gta6-cover-art-01/Anggit98tkj/gta6-cover-art/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 
-Vice Poster Maker is a GTA 6-style cover art maker that runs entirely in the browser. Upload your own photos, arrange them in six multi-panel poster layouts, pick a sunset, neon, dusk, teal or duotone grade, add frames and stickers, type a caption, and export a poster PNG. No build step, no network, no Rockstar artwork. One-click presets, keyboard shortcuts and a shuffle button are included.
+Turn your own photos into a sun-soaked Vice City style poster without leaving the browser. Vice Poster Maker runs entirely on your machine: bring up to three pictures, arrange them in one of six panel layouts, tint them with one of five colour grades, add a frame, code-drawn stickers and a bold headline, then download the finished poster as a PNG. Five ready-made looks apply a full style in a single click, and a shuffle button plus keyboard shortcuts speed things up when you want to experiment. Your photos never leave your device, there is nothing to install or build, and the app uses no Rockstar artwork, logos or typefaces.
 
 ## Run it
 

@@ -10,7 +10,7 @@ const SHOT_OPTIONS = {
   frame: ['none', 'thin', 'thick', 'halftone'],
   size: ['square', 'portrait', 'wide'],
   sticker: ['sun', 'palm', 'bolt', 'star'],
-  preset: ['golden', 'midnight', 'pastel'],
+  preset: ['golden', 'midnight', 'pastel', 'neonnights', 'tealmorning'],
 };
 
 /** Reads one allowed value from the query, or null. */
