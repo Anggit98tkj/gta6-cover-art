@@ -169,3 +169,11 @@ body.shot-cover #preview { width: 100vw; height: 100vh; max-height: none; border
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
 }
+
+/* Preset buttons: one-click looks, so they stand out from plain options. */
+#presetButtons button {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+  font-weight: 700;
+}
+#presetButtons button:hover { background: rgba(255, 211, 25, 0.12); }

@@ -1,20 +1,22 @@
-// Vice Poster Maker: a GTA-style cover art maker as plain static files under app/.
-// This program hands the entry in: it copies app/ and screenshots/ from beside this
-// file to /output and writes /output/dossier.json with the vendored make.fun library.
-// Outside the grader, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// Vice Poster Maker entry point.
+//
+// This program packages the app for make.fun: it copies app/ and
+// screenshots/ from next to this file into the output directory and
+// writes dossier.json there using the vendored make.fun helper.
+// The grader runs it with no arguments; locally you can point the
+// output elsewhere, e.g.:
+//   MAKEFUN_OUTPUT_DIR=out node main.ts
 
 import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
-const here = fileURLToPath(new URL('.', import.meta.url));
-const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-
-// The dossier caps mirror the scorer's own: at most 4 screenshots of 256 KiB each,
-// app/ at most 993 files and 48 MiB in all, no path under app/ over 1000 bytes.
-const DOSSIER_OPTIONS = {
+// Limits the dossier builder enforces, matching the scorer's caps:
+// at most 4 screenshots of 256 KiB each, app/ at most 993 files and
+// 48 MiB total, no single path under app/ longer than 1000 bytes,
+// and text files capped at 160 KiB each.
+const DOSSIER_LIMITS = {
   text_max_bytes: 163840,
   screenshots: { max: 4, max_bytes: 262144 },
   app_max_files: 993,
@@ -22,10 +24,35 @@ const DOSSIER_OPTIONS = {
   app_path_max_bytes: 1000,
 };
 
-mkdirSync(out, { recursive: true });
-cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
-mkdirSync(join(out, 'screenshots'), { recursive: true });
-if (existsSync(join(here, 'screenshots'))) {
-  cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
+function repoRoot() {
+  return fileURLToPath(new URL('.', import.meta.url));
 }
-writeFileSync(join(out, 'dossier.json'), buildDossier(out, DOSSIER_OPTIONS));
+
+function destinationDir() {
+  return process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+}
+
+function copyTree(from, to) {
+  cpSync(from, to, { recursive: true });
+}
+
+function stageAssets(root, outDir) {
+  mkdirSync(outDir, { recursive: true });
+  copyTree(join(root, 'app'), join(outDir, 'app'));
+  const shots = join(root, 'screenshots');
+  if (existsSync(shots)) {
+    mkdirSync(join(outDir, 'screenshots'), { recursive: true });
+    copyTree(shots, join(outDir, 'screenshots'));
+  }
+}
+
+function emitDossier(outDir) {
+  const json = buildDossier(outDir, DOSSIER_LIMITS);
+  writeFileSync(join(outDir, 'dossier.json'), json);
+}
+
+const root = repoRoot();
+const outDir = destinationDir();
+stageAssets(root, outDir);
+emitDossier(outDir);
+console.log(`Vice Poster Maker packaged into ${outDir} (app/, screenshots/, dossier.json).`);
