@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/gta6-cover-art-01/Anggit98tkj/gta6-cover-art/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![reward](https://make.fun/badge/gta6-cover-art-01/Anggit98tkj/gta6-cover-art/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 
-Turn your own photos into a sun-soaked Vice City style poster without leaving the browser. Vice Poster Maker runs entirely on your machine: bring up to three pictures, arrange them in one of six panel layouts, tint them with one of five colour grades, add a frame, code-drawn stickers and a bold headline, then download the finished poster as a PNG. Five ready-made looks apply a full style in a single click, and a shuffle button plus keyboard shortcuts speed things up when you want to experiment. Your photos never leave your device, there is nothing to install or build, and the app uses no Rockstar artwork, logos or typefaces.
+Vice Poster Maker turns your photos into a bold poster in the style of a Vice City sunset, right in your browser. Load up to three of your own pictures, pick one of six panel arrangements, wash them in one of five colour grades, frame the result, drop in code-drawn stickers and a big headline, then save the finished poster as a PNG. Five one-click looks apply a whole style at once, a shuffle button and keyboard shortcuts make experimenting fast, and everything runs locally: your pictures never leave your machine, there is no build step, and the app ships no Rockstar artwork, logos or fonts.
 
 ## Run it
 
@@ -13,6 +13,14 @@ node serve.ts
 ```
 
 Then open http://localhost:8080 in a browser.
+
+## What it does
+
+- Six panel layouts, five colour grades, four frame styles, and code-drawn stickers
+- Five ready-made looks: Golden, Midnight, Pastel, Neon Nights, and Teal Morning
+- Exports 1080x1080, 1080x1350, or 1920x1080 PNGs, with the caption baked in
+- Shuffle button and keyboard shortcuts for fast experimenting
+- Works fully offline once loaded; no account, no uploads, no build step
 
 ---
 

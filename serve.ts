@@ -1,34 +1,39 @@
-// Serves app/ on http://localhost:8080 for local testing in desktop Chrome.
-// Node 22, standard library only. Run: node serve.ts
+// Tiny static server for Vice Poster Maker: serves the app/ folder on
+// http://localhost:8080 so you can try it in desktop Chrome.
+// Node 22, standard library only. Start it with: node serve.ts
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const here = fileURLToPath(new URL('.', import.meta.url));
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
-  '.ttf': 'font/ttf',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.txt': 'text/plain; charset=utf-8',
-};
+const root = fileURLToPath(new URL('.', import.meta.url));
+const PORT = Number(process.env.PORT ?? 8080);
+
+function contentType(file) {
+  switch (extname(file)) {
+    case '.html': return 'text/html; charset=utf-8';
+    case '.css': return 'text/css; charset=utf-8';
+    case '.js': return 'text/javascript; charset=utf-8';
+    case '.mjs': return 'text/javascript; charset=utf-8';
+    case '.ttf': return 'font/ttf';
+    case '.jpg': case '.jpeg': return 'image/jpeg';
+    case '.png': return 'image/png';
+    case '.txt': return 'text/plain; charset=utf-8';
+    default: return 'application/octet-stream';
+  }
+}
 
 const server = createServer(async (req, res) => {
-  const path = req.url.split('?')[0].replace(/^\//, '') || 'index.html';
-  const file = join(here, 'app', path);
+  const requested = (req.url ?? '/').split('?')[0].replace(/^\//, '');
+  const target = join(root, 'app', requested === '' ? 'index.html' : requested);
   try {
-    const data = await readFile(file);
-    res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' });
-    res.end(data);
+    const body = await readFile(target);
+    res.writeHead(200, { 'content-type': contentType(target) });
+    res.end(body);
   } catch {
     res.writeHead(404, { 'content-type': 'text/plain' });
     res.end('not found');
   }
 });
 
-server.listen(8080, () => console.log('Vice Poster Maker at http://localhost:8080'));
+server.listen(PORT, () => console.log(`Vice Poster Maker at http://localhost:${PORT}`));
