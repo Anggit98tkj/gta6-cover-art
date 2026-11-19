@@ -1,6 +1,7 @@
 // Wires the editor: photo slots, layout and grade buttons, caption fields, drag-to-crop
-// on the preview, and the PNG export. Photos are read on this machine only, never uploaded.
-import { LAYOUTS, GRADES, SIZES, panelsFor, drawPoster } from './poster.js';
+// on the preview, frames, stickers, keyboard shortcuts, shuffle, and the PNG export.
+// Photos are read on this machine only, never uploaded.
+import { LAYOUTS, GRADES, SIZES, FRAMES, STICKERS, panelsFor, drawPoster, defaultSticker } from './poster.js';
 import { runShot } from './shots.js';
 
 const canvas = document.getElementById('preview');
@@ -20,6 +21,8 @@ const state = {
   subcaption: 'PALM DRIVE · EST. 2026',
   captionPos: 'bottom',
   grade: 'sunset',
+  frame: 'thin',
+  stickers: [],
   size: 'square',
   selectedPanel: 0,
 };
@@ -71,6 +74,54 @@ function assignPhoto(slot) {
 function syncZoomSlider() {
   const slot = state.panelPhoto[state.selectedPanel] ?? 0;
   document.getElementById('zoom').value = String(state.photos[slot].zoom);
+}
+
+/** Adds a sticker of `type` at its default spot, or removes it if already placed. */
+function toggleSticker(type) {
+  const at = state.stickers.findIndex((s) => s.type === type);
+  if (at >= 0) {
+    state.stickers.splice(at, 1);
+    setStatus(`${STICKERS[type].label} sticker removed.`);
+  } else {
+    state.stickers.push(defaultSticker(type));
+    setStatus(`${STICKERS[type].label} sticker added. Drag it on the preview to move it.`);
+  }
+  syncStickerButtons();
+  redraw();
+}
+
+function syncStickerButtons() {
+  const placed = new Set(state.stickers.map((s) => s.type));
+  document.querySelectorAll('#stickerButtons button').forEach((b) => {
+    b.setAttribute('aria-pressed', placed.has(b.dataset.key) ? 'true' : 'false');
+  });
+}
+
+/** Builds the toggle buttons for the sticker layer. */
+function buildStickerButtons() {
+  const host = document.getElementById('stickerButtons');
+  Object.entries(STICKERS).forEach(([key, value]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = value.label;
+    button.dataset.key = key;
+    button.setAttribute('aria-pressed', 'false');
+    button.addEventListener('click', () => toggleSticker(key));
+    host.appendChild(button);
+  });
+}
+
+/** Index of the topmost sticker under canvas point (x, y), or -1. */
+function stickerAtPoint(x, y) {
+  const reach = Math.min(canvas.width, canvas.height);
+  for (let i = state.stickers.length - 1; i >= 0; i--) {
+    const s = state.stickers[i];
+    const r = (s.size || 0.1) * reach * 0.75;
+    const dx = x - s.x * canvas.width;
+    const dy = y - s.y * canvas.height;
+    if (dx * dx + dy * dy <= r * r) return i;
+  }
+  return -1;
 }
 
 function buildPhotoSlots() {
@@ -142,6 +193,13 @@ function bindDrag() {
     const rect = canvas.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
     const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    // A sticker under the pointer is dragged first; panels come second.
+    const sticker = stickerAtPoint(x, y);
+    if (sticker >= 0) {
+      drag = { x, y, sticker };
+      canvas.setPointerCapture(e.pointerId);
+      return;
+    }
     const panel = panelAtPoint(x, y);
     if (panel < 0) return;
     state.selectedPanel = panel;
@@ -155,6 +213,15 @@ function bindDrag() {
     const rect = canvas.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
     const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    if (drag.sticker !== undefined) {
+      const s = state.stickers[drag.sticker];
+      if (!s) return;
+      s.x = Math.max(0, Math.min(1, s.x + (x - drag.x) / canvas.width));
+      s.y = Math.max(0, Math.min(1, s.y + (y - drag.y) / canvas.height));
+      drag = { x, y, sticker: drag.sticker };
+      redraw();
+      return;
+    }
     const panels = panelsFor(state.layout, canvas.width, canvas.height, state.captionPos);
     const panelRect = panels[drag.panel];
     const slot = state.panelPhoto[drag.panel] ?? 0;
@@ -166,6 +233,65 @@ function bindDrag() {
     redraw();
   });
   canvas.addEventListener('pointerup', () => { drag = null; });
+}
+
+const LAYOUT_KEYS = Object.keys(LAYOUTS);
+const GRADE_KEYS = Object.keys(GRADES);
+const FRAME_KEYS = Object.keys(FRAMES);
+
+/** Cycles `list` one step forward from `current` and returns the next key. */
+function cycleKey(list, current) {
+  return list[(list.indexOf(current) + 1) % list.length];
+}
+
+/** Picks a random arrangement: layout, grade, frame, fill, photos and stickers. */
+function shufflePoster() {
+  const pick = (list) => list[Math.floor(Math.random() * list.length)];
+  state.layout = pick(LAYOUT_KEYS);
+  state.grade = pick(GRADE_KEYS);
+  state.frame = pick(FRAME_KEYS);
+  state.captionPos = Math.random() < 0.5 ? 'top' : 'bottom';
+  state.fill = Math.random() < 0.5 ? 'single' : 'multi';
+  const count = Math.max(1, loadedCount());
+  state.panelPhoto = state.panelPhoto.map((_, i) => (state.fill === 'single' ? 0 : i % count));
+  state.stickers = [];
+  const types = Object.keys(STICKERS).sort(() => Math.random() - 0.5);
+  const n = Math.floor(Math.random() * 3);
+  for (let i = 0; i < n; i++) state.stickers.push(defaultSticker(types[i]));
+  syncControls();
+  syncStickerButtons();
+  redraw();
+  setStatus('Shuffled: new layout, grade, frame and stickers. Shuffle again for another look.');
+}
+
+function bindShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const key = e.key.toLowerCase();
+    if (key >= '1' && key <= String(LAYOUT_KEYS.length)) {
+      state.layout = LAYOUT_KEYS[Number(key) - 1];
+      syncControls();
+      redraw();
+      setStatus(`Layout: ${LAYOUTS[state.layout].label}`);
+    } else if (key === 'g') {
+      state.grade = cycleKey(GRADE_KEYS, state.grade);
+      syncControls();
+      redraw();
+      setStatus(`Grade: ${GRADES[state.grade].label}`);
+    } else if (key === 'f') {
+      state.frame = cycleKey(FRAME_KEYS, state.frame);
+      syncControls();
+      redraw();
+      setStatus(`Frame: ${FRAMES[state.frame].label}`);
+    } else if (key === 'e') {
+      e.preventDefault();
+      exportPng();
+    } else if (key === 's') {
+      shufflePoster();
+    }
+  });
 }
 
 async function exportPng() {
@@ -219,6 +345,18 @@ function bindControls() {
     redraw();
   });
   buildButtons('sizeButtons', SIZES, state.size, (key) => applySize(key));
+  buildButtons('frameButtons', FRAMES, state.frame, (key) => {
+    state.frame = key;
+    redraw();
+  });
+  buildStickerButtons();
+  document.getElementById('clearStickers').addEventListener('click', () => {
+    state.stickers = [];
+    syncStickerButtons();
+    redraw();
+    setStatus('Stickers cleared.');
+  });
+  document.getElementById('shuffle').addEventListener('click', shufflePoster);
 
   document.getElementById('caption').addEventListener('input', (e) => {
     state.caption = e.target.value;
@@ -254,6 +392,7 @@ function bindControls() {
   });
   document.getElementById('export').addEventListener('click', exportPng);
   bindDrag();
+  bindShortcuts();
 }
 
 /** Makes every control show the current state (used after a screenshot scene sets it). */
@@ -266,6 +405,8 @@ function syncControls() {
   mark('layoutButtons', state.layout);
   mark('gradeButtons', state.grade);
   mark('sizeButtons', state.size);
+  mark('frameButtons', state.frame);
+  syncStickerButtons();
   document.querySelectorAll('input[name="fill"]').forEach((radio) => {
     radio.checked = radio.value === state.fill;
   });

@@ -127,6 +127,24 @@ fieldset label { margin: 4px 0; }
 .hint { font-size: 13px; color: var(--muted); margin: 6px 0 10px; }
 #status { min-height: 1.4em; color: var(--accent-2); }
 
+kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: 700 12px/1.4 inherit;
+}
+
+#shuffle {
+  border-color: var(--accent-3);
+  color: var(--accent-3);
+  font-weight: 700;
+}
+#shuffle:hover { background: rgba(0, 229, 255, 0.12); }
+
 .preview h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin: 0 0 10px; }
 #preview {
   display: block;

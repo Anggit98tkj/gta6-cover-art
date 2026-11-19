@@ -52,9 +52,23 @@
     </div>
 
     <div class="group">
-      <h2>5. Size &amp; export</h2>
+      <h2>5. Frame &amp; stickers</h2>
+      <div class="row" id="frameButtons" role="group" aria-label="Poster frame"></div>
+      <div class="row" id="stickerButtons" role="group" aria-label="Stickers"></div>
+      <div class="row">
+        <button id="clearStickers" type="button">Clear stickers</button>
+      </div>
+      <p class="hint">Stickers sit on top of the poster. Click one to add it, click again to remove it, drag it on the preview to move it.</p>
+    </div>
+
+    <div class="group">
+      <h2>6. Size &amp; export</h2>
       <div class="row" id="sizeButtons" role="group" aria-label="Export size"></div>
+      <div class="row">
+        <button id="shuffle" type="button">Shuffle the look</button>
+      </div>
       <button id="export" type="button" class="primary">Export PNG</button>
+      <p class="hint">Shortcuts: <kbd>1</kbd>&ndash;<kbd>6</kbd> layout, <kbd>G</kbd> grade, <kbd>F</kbd> frame, <kbd>S</kbd> shuffle, <kbd>E</kbd> export.</p>
       <p id="status" role="status"></p>
     </div>
   </section>
