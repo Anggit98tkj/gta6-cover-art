@@ -74,10 +74,12 @@ class Editor {
     this.sizeLabel.textContent = `— ${SIZES[this.state.size].label}`;
   }
 
-  /** Waits for the display font so the caption is drawn in Anton. */
+  /** Waits for the display font so the caption is drawn in Bebas Neue.
+   *  The face is served locally from app/fonts/BebasNeue-Regular.ttf
+   *  via the @font-face rule in style.css, so this load never hits the network. */
   async loadFonts() {
     try {
-      await document.fonts.load('80px Anton');
+      await document.fonts.load('80px "Bebas Neue"');
       await document.fonts.ready;
     } catch { /* fall back to sans-serif */ }
   }

@@ -4,7 +4,7 @@
 // the exact same render, so what you see is what you save. The
 // renderer below is organised as a class, one method per stage, so a
 // new layout or grade is a small local change. No Rockstar artwork,
-// logo or typeface is used anywhere; the display lettering is Anton
+// logo or typeface is used anywhere; the display lettering is Bebas Neue
 // (SIL Open Font License), shipped under app/fonts/.
 
 export const LAYOUTS = {
@@ -626,9 +626,11 @@ export class PosterRenderer {
     const cx = w / 2;
     if (text) {
       // The caption sits in the upper part of the band when a sub-caption follows it.
+      // Bebas Neue measures narrower than the previous face, so a caption that
+      // used to shrink now fits at a larger size; shrinkToFit still caps it.
       const centerY = sub ? bandY + bandH * 0.36 : bandY + bandH * 0.54;
       const startSize = sub ? bandH * 0.44 : bandH * 0.56;
-      const size = this.shrinkToFit(text, w * 0.92, startSize, 'Anton, sans-serif');
+      const size = this.shrinkToFit(text, w * 0.92, startSize, "'Bebas Neue', sans-serif");
       const grad = ctx.createLinearGradient(0, centerY - size / 2, 0, centerY + size / 2);
       grad.addColorStop(0, this.grade.caption[0]);
       grad.addColorStop(1, this.grade.caption[1]);
